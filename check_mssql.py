@@ -13,6 +13,10 @@ MSSQL_DB = os.environ["MSSQL_DB"]
 URI = f"mssql+pymssql://{MSSQL_USER}:{MSSQL_PASSWORD}@{MSSQL_ADDRESS}:{MSSQL_PORT}/{MSSQL_DB}"
 
 engine = create_engine(URI)
+
+# Test the connection
+engine.execute(text("SELECT 1"))
+
 conn = engine.connect()
 
 print(f"Connected to {MSSQL_ADDRESS}:{MSSQL_PORT}")
