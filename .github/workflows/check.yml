@@ -1,0 +1,61 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request: {}
+  workflow_dispatch:
+    inputs: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        sqlalchemy-version: ["1.4.*", "2.0.*"]
+      fail-fast: false
+
+    name: "Check MSSQL on SQLAlchemy ${{ matrix.sqlalchemy-version }}"
+    runs-on: ubuntu-latest
+    env:
+      FORCE_COLOR: 1
+      MSSQL_ADDRESS: localhost
+      MSSQL_PORT: 1433
+      MSSQL_USER: sa
+      MSSQL_PASSWORD: Meltan0admin
+      MSSQL_DB: pytest_warehouse
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v3.5.3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4.7.0
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2.8.0
+
+    - name: Get Docker
+      uses: actions-hub/docker/cli@v1.0.3
+      env:
+        SKIP_LOGIN: true
+
+    - name: Start MSSQL Container
+      run: |
+        docker compose up -d --wait --quiet-pull
+
+    - name: Check running containers
+      run: |
+        docker ps -a
+
+    - name: Install Dependencies
+      run: |
+        pip install pymssql==2.2.7 sqlalchemy==${{ matrix.sqlalchemy-version }}
+
+    - name: Run script
+      shell: bash
+      run: |
+        python scripts/check_mssql.py
