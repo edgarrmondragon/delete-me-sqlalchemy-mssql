@@ -1,0 +1,64 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request: {}
+  workflow_dispatch:
+    inputs: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        sqlalchemy-version: ["1.4.*", "2.0.*"]
+      fail-fast: false
+
+    name: "Check MSSQL on SQLAlchemy ${{ matrix.sqlalchemy-version }}"
+    runs-on: ${{ matrix.os }}
+    env:
+      FORCE_COLOR: 1
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v3.5.3
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4.7.0
+
+    - name: Start MSSQL Container
+      if: always() && (matrix.backend-db == 'mssql')
+      run: >
+        docker run -d
+        -p "1433:1433"
+        -e "SA_PASSWORD=Meltan0admin"
+        -e "ACCEPT_EULA=Y"
+        --name mssql
+        --health-cmd "/opt/mssql-tools/bin/sqlcmd -U sa -P Meltan0admin -Q 'select 1' -b -o /dev/null"
+        --health-interval 10s
+        --health-timeout 5s
+        --health-retries 5
+        mcr.microsoft.com/mssql/server:2019-latest
+
+    - name: Check running containers
+      run: |
+        docker ps -a
+
+    - name: Install Dependencies
+      run: |
+        pip install pymssql==2.2.7 sqlalchemy==${{ matrix.sqlalchemy-version }}
+
+    - name: Run pytest
+      env:
+        MSSQL_ADDRESS: localhost
+        MSSQL_PORT: 1433
+        MSSQL_USER: sa
+        MSSQL_PASSWORD: Meltan0admin
+        MSSQL_DB: pytest_warehouse
+      shell: bash
+      run: |
+        python check_mssql.py
