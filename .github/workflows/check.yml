@@ -47,6 +47,7 @@ jobs:
         --health-timeout 5s
         --health-retries 5
         --health-start-period 10s
+        --wait
         mcr.microsoft.com/mssql/server:2019-latest
 
     - name: Check running containers
