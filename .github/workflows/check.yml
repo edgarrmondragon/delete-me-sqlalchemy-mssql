@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
 
     name: "Check MSSQL on SQLAlchemy ${{ matrix.sqlalchemy-version }}"
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     env:
       FORCE_COLOR: 1
 
