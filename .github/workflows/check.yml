@@ -59,4 +59,4 @@ jobs:
     - name: Run script
       shell: bash
       run: |
-        python check_mssql.py
+        python scripts/check_mssql.py
