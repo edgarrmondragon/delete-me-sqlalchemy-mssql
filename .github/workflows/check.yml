@@ -39,7 +39,7 @@ jobs:
       run: >
         docker run -d
         -p "${{ env.MSSQL_PORT }}:1433"
-        -e "SA_PASSWORD=${{ env.MSSQL_PASSWORD }}"
+        -e "MSSQL_SA_PASSWORD=${{ env.MSSQL_PASSWORD }}"
         -e "ACCEPT_EULA=Y"
         --name mssql
         --health-cmd "/opt/mssql-tools/bin/sqlcmd -U ${{ env.MSSQL_USER }} -P ${{ env.MSSQL_PASSWORD }} -Q 'select 1' -b -o /dev/null"
