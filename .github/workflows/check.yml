@@ -44,19 +44,8 @@ jobs:
         SKIP_LOGIN: true
 
     - name: Start MSSQL Container
-      run: >
-        docker run -d
-        -p "${{ env.MSSQL_PORT }}:1433"
-        -e "MSSQL_SA_PASSWORD=${{ env.MSSQL_PASSWORD }}"
-        -e "ACCEPT_EULA=Y"
-        --name mssql
-        --health-cmd "/opt/mssql-tools/bin/sqlcmd -U ${{ env.MSSQL_USER }} -P ${{ env.MSSQL_PASSWORD }} -Q 'select 1' -b -o /dev/null"
-        --health-interval 10s
-        --health-timeout 5s
-        --health-retries 5
-        --health-start-period 10s
-        --wait
-        mcr.microsoft.com/mssql/server:2019-latest
+      run: |
+        docker compose up -d --wait --quiet-pull
 
     - name: Check running containers
       run: |
