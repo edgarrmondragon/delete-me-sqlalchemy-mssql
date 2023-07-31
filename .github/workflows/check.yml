@@ -22,23 +22,27 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_COLOR: 1
+      MSSQL_ADDRESS: localhost
+      MSSQL_PORT: 1433
+      MSSQL_USER: sa
+      MSSQL_PASSWORD: Meltan0admin
+      MSSQL_DB: pytest_warehouse
 
     steps:
     - name: Check out the repository
       uses: actions/checkout@v3.5.3
 
-    - name: Setup Python ${{ matrix.python-version }}
+    - name: Setup Python
       uses: actions/setup-python@v4.7.0
 
     - name: Start MSSQL Container
-      if: always() && (matrix.backend-db == 'mssql')
       run: >
         docker run -d
         -p "1433:1433"
-        -e "SA_PASSWORD=Meltan0admin"
+        -e "SA_PASSWORD=${{ env.MSSQL_PASSWORD }}"
         -e "ACCEPT_EULA=Y"
         --name mssql
-        --health-cmd "/opt/mssql-tools/bin/sqlcmd -U sa -P Meltan0admin -Q 'select 1' -b -o /dev/null"
+        --health-cmd "/opt/mssql-tools/bin/sqlcmd -U sa -P ${{ env.MSSQL_PASSWORD }} -Q 'select 1' -b -o /dev/null"
         --health-interval 10s
         --health-timeout 5s
         --health-retries 5
@@ -52,13 +56,7 @@ jobs:
       run: |
         pip install pymssql==2.2.7 sqlalchemy==${{ matrix.sqlalchemy-version }}
 
-    - name: Run pytest
-      env:
-        MSSQL_ADDRESS: localhost
-        MSSQL_PORT: 1433
-        MSSQL_USER: sa
-        MSSQL_PASSWORD: Meltan0admin
-        MSSQL_DB: pytest_warehouse
+    - name: Run script
       shell: bash
       run: |
         python check_mssql.py

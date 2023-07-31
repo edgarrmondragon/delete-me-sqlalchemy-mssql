@@ -15,6 +15,8 @@ URI = f"mssql+pymssql://{MSSQL_USER}:{MSSQL_PASSWORD}@{MSSQL_ADDRESS}:{MSSQL_POR
 engine = create_engine(URI)
 conn = engine.connect()
 
+print(f"Connected to {MSSQL_ADDRESS}:{MSSQL_PORT}")
+
 # Create the table
 conn.execute(
     text(
@@ -29,6 +31,8 @@ conn.execute(
     ),
 )
 
+print("Created table 'test'")
+
 # Insert some data
 conn.execute(
     text(
@@ -41,6 +45,8 @@ conn.execute(
         ),
     ),
 )
+
+print("Inserted data into 'test'")
 
 # Query the data
 result = conn.execute(
